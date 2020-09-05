@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', 'EPGcontroller@index')->name('home');
-
 Route::post('/m3u/gelist.php', 'EPGcontroller@getlist');
 
 Route::get('/{provider}/epg/{channel_name}.json', 'EPGcontroller@channelEPG');
