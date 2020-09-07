@@ -15,6 +15,13 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'default_provider' => env('EPG_DEFAULT_PROVIDER', 'pr2pr'),
+
+    'sources' => [
+        ['name'=>'pr2pr','url'=>env('EPG_FILE_PR2PR_URL')],
+        ['name'=>'danas544','url'=>env('EPG_FILE_DANAS544_URL')],
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
