@@ -6,12 +6,12 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Str;
+use App\Models\Provider;
 
 class downloadEPG implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable;
 
     /**
      * Create a new job instance.
@@ -30,11 +30,10 @@ class downloadEPG implements ShouldQueue
      */
     public function handle()
     {
-        foreach(config('app.sources') as $source){
-            if(!$source['url']) return;
-            $extension = pathinfo($source['url'], PATHINFO_EXTENSION);
+        foreach(Provider::where('active',1)->wherenotnull('url')->get() as $provider){
+            $extension = pathinfo($provider->url, PATHINFO_EXTENSION);
             $filename = storage_path('app').DIRECTORY_SEPARATOR.Str::random(24).'.'.$extension; //temp filename
-            if(@copy($source['url'], $filename)) {
+            if(@copy($provider->url, $filename)) {
                 if($extension=='gz'){ //Extract content
                     $buffer_size = 4096;
                     $out_file_name = str_replace('.gz', '.xml', $filename); 
@@ -48,7 +47,8 @@ class downloadEPG implements ShouldQueue
                     unlink($filename);
                     $filename = $out_file_name;
                 }
-                rename($filename, storage_path('app').DIRECTORY_SEPARATOR.strtoupper($source['name']).'.xml');
+                rename($filename, storage_path('app').DIRECTORY_SEPARATOR.$provider->id.'.xml');
+                \App\Jobs\processXML::dispatch($provider,$provider->id.'.xml');
             }
         }
     }
