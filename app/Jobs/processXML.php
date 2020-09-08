@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Redis;
 use App\Models\Provider;
 use App\Models\EPG;
 use Carbon\Carbon;
@@ -59,5 +60,6 @@ class processXML implements ShouldQueue
             $z->next('programme');
         }
         Storage::delete($this->file_name);
+        Redis::flushDB();
     }
 }
