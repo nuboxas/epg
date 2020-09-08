@@ -52,7 +52,6 @@ class EPGcontroller extends Controller
             Redis::set('provider'.$provider->id.':channel:'.$channel_name, $epg);
         } else {
             $epg = json_decode($epg);
-            Log::debug($epg);
         }
         return [
             'epg_data' => $epg
