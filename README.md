@@ -7,7 +7,7 @@ This PHP script, using Laravel framework helps you to grab and store your own or
 
 ## How to use it?
 
-- Run this app using Nginx, Apache or any other web server
+- Run this app using [Nginx](https://github.com/nuboxas/epg-multi/blob/master/nginx.config), Apache or any other web server
 - Setup your database, where all EPG will be stored
 - Add provider(s) info to your database
 - Adjust scheduler when to update all of EPG
