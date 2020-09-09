@@ -1,6 +1,7 @@
 ## EPG for ott-play by alex
 
 As we all know about this great lightweight app for watching IPTV streams, and we all love it, BUT, it always had one problem - **EPG** 
+
 We patiently waited for developer of this app to add this crucial feature, of having your own EPG, so we decided to _add_ this missing feature using DNS hack.
 
 This PHP script, using Laravel framework helps you to grab and store your own or public EPG xml files on database or your choice.
