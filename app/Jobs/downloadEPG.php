@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Provider;
 
 class downloadEPG implements ShouldQueue
@@ -31,25 +32,30 @@ class downloadEPG implements ShouldQueue
     public function handle()
     {
         foreach(Provider::where('active',1)->wherenotnull('url')->get() as $provider){
-            $extension = pathinfo($provider->url, PATHINFO_EXTENSION);
-            $filename = storage_path('app').DIRECTORY_SEPARATOR.Str::random(24).'.'.$extension; //temp filename
-            if(@copy($provider->url, $filename)) {
-                if($extension=='gz'){ //Extract content
-                    $buffer_size = 4096;
-                    $out_file_name = str_replace('.gz', '.xml', $filename); 
-                    $file = gzopen($filename, 'rb');
-                    $out_file = fopen($out_file_name, 'wb'); 
-                    while(!gzeof($file)) {
-                        fwrite($out_file, gzread($file, $buffer_size));
-                    }  
-                    fclose($out_file);
-                    gzclose($file);
-                    unlink($filename);
-                    $filename = $out_file_name;
+            if(Str::startsWith($provider->url, 'http')){ //URL
+                $extension = pathinfo($provider->url, PATHINFO_EXTENSION);
+                $filename = storage_path('app').DIRECTORY_SEPARATOR.Str::random(24).'.'.$extension; //temp filename
+                if(@copy($provider->url, $filename)) {
+                    if($extension=='gz'){ //Extract content
+                        $buffer_size = 4096;
+                        $out_file_name = str_replace('.gz', '.xml', $filename); 
+                        $file = gzopen($filename, 'rb');
+                        $out_file = fopen($out_file_name, 'wb'); 
+                        while(!gzeof($file)) {
+                            fwrite($out_file, gzread($file, $buffer_size));
+                        }  
+                        fclose($out_file);
+                        gzclose($file);
+                        unlink($filename);
+                        $filename = $out_file_name;
+                    }
+                    rename($filename, storage_path('app').DIRECTORY_SEPARATOR.$provider->id.'.xml');
+                    \App\Jobs\processXML::dispatch($provider,$provider->id.'.xml');
                 }
-                rename($filename, storage_path('app').DIRECTORY_SEPARATOR.$provider->id.'.xml');
-                \App\Jobs\processXML::dispatch($provider,$provider->id.'.xml');
+            } else { //Local file. Must be in /storage/app folder
+                \App\Jobs\processXML::dispatchIf(Storage::exists($provider->url), $provider,$provider->url);
             }
+
         }
     }
 }
