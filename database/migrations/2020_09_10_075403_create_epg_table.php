@@ -17,7 +17,7 @@ class CreateEpgTable extends Migration
             $table->uuid('id');
             $table->foreignId('provider_id')->constrained('providers');
             $table->string('tvg_id', 60);
-            $table->string('name', 255);
+            $table->text('name');
             $table->integer('time_from');
             $table->integer('time_to');
             $table->text('description')->nullable();
