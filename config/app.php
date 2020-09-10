@@ -19,6 +19,8 @@ return [
 
     'redis_enabled' => env('REDIS_ENABLED', true),
 
+    'delete_file' => env('DELETE_PROCESSED_FILE', true),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
