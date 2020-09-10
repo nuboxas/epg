@@ -24,7 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->job(new \App\Jobs\downloadEPG)->dailyAt('2:50');
+        $schedule->job(new \App\Jobs\downloadEPG)->everyMinute();
     }
 
     /**

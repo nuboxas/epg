@@ -14,7 +14,7 @@ class CreateEpgTable extends Migration
     public function up()
     {
         Schema::create('epg', function (Blueprint $table) {
-            $table->string('id', 36);
+            $table->uuid('id');
             $table->foreignId('provider_id')->constrained('providers');
             $table->string('tvg_id', 60);
             $table->string('name', 255);
@@ -23,6 +23,7 @@ class CreateEpgTable extends Migration
             $table->text('description')->nullable();
             $table->timestamps();
             //Creating Index
+            $table->primary('id');
             $table->index('tvg_id');
         });
     }

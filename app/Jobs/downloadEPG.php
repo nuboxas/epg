@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Provider;
+use Illuminate\Support\Facades\Log;
 
 class downloadEPG implements ShouldQueue
 {
@@ -32,6 +33,7 @@ class downloadEPG implements ShouldQueue
     public function handle()
     {
         foreach(Provider::where('active',1)->wherenotnull('url')->get() as $provider){
+            Log::info('provider',$provider->toArray());
             if(Str::startsWith($provider->url, 'http')){ //URL
                 $extension = pathinfo($provider->url, PATHINFO_EXTENSION);
                 $filename = storage_path('app').DIRECTORY_SEPARATOR.Str::random(24).'.'.$extension; //temp filename
@@ -53,7 +55,11 @@ class downloadEPG implements ShouldQueue
                     \App\Jobs\processXML::dispatch($provider,$provider->id.'.xml');
                 }
             } else { //Local file. Must be in /storage/app folder
-                \App\Jobs\processXML::dispatchIf(Storage::exists($provider->url), $provider,$provider->url);
+                if(Storage::exists($provider->url)){
+                    \App\Jobs\processXML::dispatch($provider,$provider->url);
+                } else {
+                    Log::warning('file not found',['filename'=>$provider->url]);
+                }
             }
 
         }

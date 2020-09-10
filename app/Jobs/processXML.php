@@ -59,6 +59,6 @@ class processXML implements ShouldQueue
             $z->next('programme');
         }
         Storage::delete($this->file_name);
-        if(config('redis_enabled')) Redis::flushDB();
+        if(config('app.redis_enabled')) Redis::flushDB();
     }
 }
