@@ -12,5 +12,5 @@ This PHP script, using Laravel framework helps you to grab and store your own or
 - Setup your database, where all EPG will be stored
 - Add provider(s) info to your database
 - Adjust scheduler when to update all of EPG
-- Setup Redis connection (for caching EPG) _optional_
+- Setup Redis connection (for caching EPG) (put ```REDIS_ENABLED=false``` in .env file if you do no want to use Redis)
 - Change DNS record, to point _epg.ott-play.com_ to your server
