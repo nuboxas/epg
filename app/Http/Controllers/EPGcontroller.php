@@ -6,9 +6,13 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Arr;
 
+use Illuminate\Support\Facades\DB;
+
 use App\Models\Provider;
 
 use App\Models\EPG;
+
+use Illuminate\Support\Facades\Log;
 
 use Illuminate\Support\Facades\Redis;
 
@@ -29,9 +33,11 @@ class EPGcontroller extends Controller
     }
 
     function channelEPG($provider,$channel_name){
+        $providers_names = array_filter(explode(";", $provider));
+        if(!$providers_names || count($providers_names)==0) return ['epg_data'=>[]];
         $channel_name = pathinfo($channel_name, PATHINFO_FILENAME);
-        $provider = Provider::where('name',$provider)->first();
-        if(!$provider) return ['epg_data'=>[]];
+        $provider = self::getProviderId(Arr::flatten($providers_names),$channel_name);
+        if(!$provider || !isset($provider->id)) return ['epg_data'=>[]];
         $epg = (config('app.redis_enabled')) ? Redis::get('provider'.$provider->id.':channel:'.$channel_name) : null;
         if(!$epg) {
             $epg = EPG::select('name','time_from as time','time_to','description as descr')
@@ -42,9 +48,7 @@ class EPGcontroller extends Controller
         } else {
             $epg = json_decode($epg);
         }
-        return [
-            'epg_data' => $epg
-        ];
+        return ['epg_data' => $epg];
     }
 
     function providersChannels($provider){
@@ -69,5 +73,16 @@ class EPGcontroller extends Controller
             ];
         }
         return $results;
+    }
+
+    private static function getProviderId($providers_names,$channel){
+        return DB::table('providers')
+                ->select('providers.id')
+                ->join('epg','epg.provider_id','=','providers.id')
+                ->wherein('providers.name',$providers_names)
+                ->where('epg.tvg_id',$channel)
+                ->groupby(['provider_id','tvg_id'])
+                ->orderby(DB::raw('max(epg.time_to)'),'desc')
+                ->first('id');
     }
 }
