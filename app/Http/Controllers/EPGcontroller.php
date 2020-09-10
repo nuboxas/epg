@@ -74,12 +74,12 @@ class EPGcontroller extends Controller
 
     private static function getProviderId($providers_names,$channel){
         return DB::table('providers')
-                ->select('providers.id')
+                ->select('epg.provider_id as id')
                 ->join('epg','epg.provider_id','=','providers.id')
                 ->wherein('providers.name',$providers_names)
                 ->where('epg.tvg_id',$channel)
-                ->groupby(['provider_id','tvg_id'])
+                ->groupby(['epg.provider_id','epg.tvg_id'])
                 ->orderby(DB::raw('max(epg.time_to)'),'desc')
-                ->first('id');
+                ->first();
     }
 }
