@@ -22,12 +22,9 @@ class EPGcontroller extends Controller
         $return=[];
         $list = json_decode($request->input('list'),true);
         foreach($list as $id => $info){
-            $provider = null;
-            if(isset($info['u'])) $provider = Provider::where('name',$info['u'])->first();
-            if(!$provider) $provider = Provider::where('name',config('app.default_provider'))->first();
-            if(!$provider) break;
+            $provider = (isset($info['u'])) ? $info['u'] : config('app.default_provider');
             $channel = (isset($info['e'])) ? $info['e'] : $info['n'];
-            $return=Arr::add($return, $id, $provider->name."/epg/$channel");
+            $return=Arr::add($return, $id, $provider."/epg/$channel");
         }
         return $return;
     }
