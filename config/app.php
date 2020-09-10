@@ -15,7 +15,9 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
-    'default_provider' => env('EPG_DEFAULT_PROVIDER', 'Danas 544'),
+    'default_provider' => env('EPG_DEFAULT_PROVIDER', ''),
+
+    'redis_enabled' => env('REDIS_ENABLED', true),
 
     /*
     |--------------------------------------------------------------------------

@@ -4,17 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use Carbon\Carbon;
-
-use Illuminate\Support\Facades\Log;
-
-use Illuminate\Support\Facades\Storage;
-
-use Illuminate\Support\Str;
-
 use Illuminate\Support\Arr;
-
-use Illuminate\Support\Facades\DB;
 
 use App\Models\Provider;
 
@@ -25,7 +15,6 @@ use Illuminate\Support\Facades\Redis;
 class EPGcontroller extends Controller
 {
     function getlist(Request $request){
-        Log::debug($request->all());
         $return=[];
         $list = json_decode($request->input('list'),true);
         foreach($list as $id => $info){
@@ -43,13 +32,13 @@ class EPGcontroller extends Controller
         $channel_name = pathinfo($channel_name, PATHINFO_FILENAME);
         $provider = Provider::where('name',$provider)->first();
         if(!$provider) return ['epg_data'=>[]];
-        $epg = Redis::get('provider'.$provider->id.':channel:'.$channel_name);
+        $epg = (config('redis_enabled')) ? Redis::get('provider'.$provider->id.':channel:'.$channel_name) : null;
         if(!$epg) {
             $epg = EPG::select('name','time_from as time','time_to','description as descr')
             ->where('provider_id',$provider->id)
             ->where('tvg_id',$channel_name)
             ->get();
-            Redis::set('provider'.$provider->id.':channel:'.$channel_name, $epg);
+            if(config('redis_enabled')) Redis::set('provider'.$provider->id.':channel:'.$channel_name, $epg);
         } else {
             $epg = json_decode($epg);
         }
